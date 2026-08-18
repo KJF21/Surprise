@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surprise Thank You Card</title>
+  <style>
+  body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:#fff;
+
+      background: rgb(255, 183, 197);
+                  
+                  center/cover no-repeat fixed;
+    }
+
+    /* Side-by-side layout:
+       Left = slideshow, Right = flip card */
+    .layout{
+      width: min(1200px, 96vw);
+      display:flex;
+      gap:26px;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .slideshowSection{
+      flex: 1 1 58%;
+      min-width: 320px;
+      max-width: 680px;
+    }
+
+    .card{
+      flex: 1 1 42%;
+      min-width: 320px;
+      max-width: 560px;
+    }
+
+    /* ===== FLIP CARD ===== */
+    .flip{
+      position:relative;
+      width:100%;
+      height:520px;
+      transform-style:preserve-3d;
+      transition: transform .9s ease;
+    }
+    .card{
+      perspective: 1200px;
+      /* NOTE: .card is also used above for sizing; keep it as wrapper */
+    }
+    .card .flip{
+      margin: 0 auto;
+    }
+    .card.flipped .flip{ transform: rotateY(180deg); }
+
+    .face{
+      position:absolute;
+      inset:0;
+      padding:26px;
+      border-radius:18px;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.18);
+      overflow:hidden;
+      background: rgba(0,0,0,.12);
+    }
+
+    .front{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:flex-start;
+      height:100%;
+    }
+
+    .front .sparkles{
+      position:absolute;
+      inset:-60px;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,.18), transparent 35%),
+        radial-gradient(circle at 70% 20%, rgba(255,255,255,.12), transparent 30%),
+        radial-gradient(circle at 80% 70%, rgba(255,77,109,.22), transparent 35%);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .front h1{
+      margin:0;
+      font-size: clamp(26px, 4vw, 42px);
+      letter-spacing:.5px;
+      position:relative;
+      z-index:1;
+    }
+
+    .front p{
+      margin:0;
+      color: rgba(255,255,255,.85);
+      max-width: 60ch;
+      line-height:1.5;
+      font-size: 16px;
+      position:relative;
+      z-index:1;
+    }
+
+    /* CTA centered */
+    .cta{
+      margin-top:10px;
+      width:100%;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      z-index:1;
+    }
+
+    button{
+      cursor:pointer;
+      border:none;
+      padding:12px 18px;
+      border-radius:12px;
+      font-weight:800;
+      background: #ff4d6d;
+      color:white;
+      box-shadow: 0 10px 25px rgba(255,77,109,.35);
+      transition: transform .1s ease, filter .2s ease;
+    }
+    button:active{ transform: scale(.98); }
+
+    .hint{
+      color: rgba(255,255,255,.75);
+      font-size: 14px;
+      position:relative;
+      z-index:1;
+      white-space: nowrap;
+    }
+
+    .back{
+      transform: rotateY(180deg);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      background: rgba(0,0,0,.08);
+      text-align:left;
+      height:100%;
+    }
+
+    .back h2{
+      margin:0;
+      font-size: clamp(22px, 3.3vw, 34px);
+    }
+
+    .message{
+      margin:0;
+      color: rgba(255,255,255,.92);
+      line-height:1.7;
+      font-size: 16px;
+      max-width: 62ch;
+      white-space: normal;
+      position:relative;
+      z-index:1;
+      overflow-wrap: anywhere;
+    }
+
+    .signature{
+      margin-top:10px;
+      color: rgba(255,255,255,.85);
+      font-style: italic;
+      position:relative;
+      z-index:1;
+    }
+
+/* ===== Slideshow ===== */
+.slideshow{
+  width: 100%;
+  aspect-ratio: 5 / 4;              /* taller than 16:9 */
+  height: clamp(600px, 80vw, 900px); /* bigger/longer */
+  border-radius: 14px;
+  overflow:hidden;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  position:relative;
+  z-index:1;
+}
+
+
+
+    .slides{
+      width:100%;
+      height:100%;
+      display:flex;
+      transition: transform .7s ease;
+    }
+
+    .slide{
+      min-width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .slide img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .slide video{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      display:block;
+      background:#000;
+    }
+
+    .slideshow:after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(to bottom, rgba(0,0,0,.05), rgba(0,0,0,.35));
+      pointer-events:none;
+    }
+
+    .slideshow-controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:10px;
+      justify-content:center;
+    }
+
+    .smallBtn{
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:800;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      color:#fff;
+      box-shadow:none;
+    }
+
+    .dots{ display:flex; gap:6px; align-items:center; }
+    .dot{
+      width:9px; height:9px; border-radius:50%;
+      background: rgba(255,255,255,.35);
+      cursor:pointer;
+    }
+    .dot.active{ background: rgba(255,77,109,.95); transform: scale(1.15); }
+
+    .audioWrap{
+      width:100%;
+      position:relative;
+      margin-top:6px;
+      z-index:1;
+    }
+
+    audio{ width: 100%; }
+    audio::-webkit-media-controls-panel{ display:none !important; }
+    audio{ height: 0; overflow:hidden; }
+
+    /* Mobile: stack */
+    @media (max-width: 900px){
+      .layout{
+        flex-direction:column;
+        gap:18px;
+        align-items:center;
+      }
+      .slideshowSection, .card{
+        max-width: 680px;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <!-- LEFT: Slideshow -->
+    <div class="slideshowSection">
+      <div class="audioWrap">
+        <audio id="bgm" src="music.mp3" preload="auto" autoplay loop></audio>
+      </div>
+
+      <div class="slideshow" aria-label="Photo and video slideshow">
+        <div class="slides" id="slides">
+          <div class="slide">
+            <img src="MINE.jpeg" alt="Our photo">
+          </div>
+
+          <div class="slide">
+            <video src="1.mp4" muted playsinline></video>
+          </div>
+
+          <div class="slide">
+            <video src="2.mp4" muted playsinline></video>
+          </div>
+
+          <div class="slide">
+            <video src="3.mp4" muted playsinline></video>
+          </div>
+        </div>
+      </div>
+
+      <div class="slideshow-controls">
+        <button class="smallBtn" onclick="prevSlide()">◀ Prev</button>
+        <div class="dots" id="dots"></div>
+        <button class="smallBtn" onclick="nextSlide()">Next ▶</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Flip Card -->
+    <div class="card" id="card">
+      <div class="flip">
+
+        <!-- FRONT -->
+        <div class="face front">
+          <div class="sparkles"></div>
+          <h1>🎉 Surprise Thank You!</h1>
+          <p>Tap reveal—your message is waiting. 💖</p>
+
+          <div class="cta">
+            <button onclick="flipCard()">Reveal</button>
+            <div class="hint">No spoilers—just love.</div>
+          </div>
+        </div>
+
+        <!-- BACK -->
+        <div class="face back">
+          <h2>To my only Ali</h2>
+
+          <p class="message">
+            I couldn't believe love could be this so real that feels so natural,<br>
+            The day that you caught my attention seeing how you always look at my way<br>
+            whenever we meet at the training room or production floor, I will never<br>
+            forget the look in your eyes when you were sleeping and suddenly saw my face<br>
+            it was the cutest moment seeing you in a disarray not knowing what face to make.<br><br>
+
+            Every time we talk it did not feel forced it felt natural like we have known<br>
+            each other for a long time, this past 3 months it did not feel like 3 months but felt like<br>
+            years of us knowing and loving each other. I love you sooo much honnn.
+          </p>
+
+          <div class="signature">— With all my love</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function flipCard(){
+      document.getElementById("card").classList.toggle("flipped");
+    }
+    document.getElementById("card").addEventListener("dblclick", flipCard);
+
+    // Music autoplay attempt
+    const bgm = document.getElementById("bgm");
+    bgm.volume = 1;
+    bgm.play().catch(() => {
+      bgm.muted = true;
+      bgm.play().catch(() => {});
+    });
+
+    // Slideshow auto every 30 seconds
+    const slidesEl = document.getElementById("slides");
+    const slides = Array.from(slidesEl.children);
+    const dotsEl = document.getElementById("dots");
+
+    let index = 0;
+    const intervalMs = 30000; // 30 seconds
+    let timer = null;
+
+    // Create dots
+    dotsEl.innerHTML = "";
+    slides.forEach((_, i) => {
+      const d = document.createElement("div");
+      d.className = "dot" + (i === 0 ? " active" : "");
+      d.onclick = () => goTo(i);
+      dotsEl.appendChild(d);
+    });
+
+    function setActiveDot() {
+      Array.from(dotsEl.children).forEach((d, i) => {
+        d.classList.toggle("active", i === index);
+      });
+    }
+
+    function pauseVideos() {
+      slides.forEach(s => {
+        const v = s.querySelector("video");
+        if (v) v.pause();
+      });
+    }
+
+    function playActiveVideo() {
+      const active = slides[index];
+      const v = active.querySelector("video");
+      if (v) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      }
+    }
+
+    function goTo(i){
+      index = (i + slides.length) % slides.length;
+      slidesEl.style.transform = `translateX(-${index * 100}%)`;
+      setActiveDot();
+      pauseVideos();
+      playActiveVideo();
+    }
+
+    function nextSlide(){ goTo(index + 1); }
+    function prevSlide(){ goTo(index - 1); }
+
+    function start(){
+      stop();
+      timer = setInterval(nextSlide, intervalMs);
+    }
+    function stop(){
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    // Init
+    goTo(0);
+    start();
+
+    // Restart timer on interaction
+    document.querySelectorAll(".smallBtn, .dot").forEach(el => {
+      el.addEventListener("click", () => start());
+    });
+  </script>
+</body>
+</html>
