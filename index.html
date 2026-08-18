@@ -364,11 +364,24 @@
     document.getElementById("card").addEventListener("dblclick", flipCard);
 
     // Music autoplay attempt
-    const bgm = document.getElementById("bgm");
-    bgm.volume = 1;
-    bgm.play().catch(() => {
-      bgm.muted = true;
-      bgm.play().catch(() => {});
+    const bgm = document.getElementById('bgm');
+
+    async function tryPlay() {
+      try {
+        await bgm.play();
+      } catch (e) {
+        // autoplay blocked
+        console.log("Autoplay blocked. Click/tap to start.");
+      }
+    }
+
+    // try immediately
+    tryPlay();
+
+    // allow starting after user interaction
+    document.addEventListener('click', () => {
+      bgm.play();
+    }, { once: true });
     });
 
     // Slideshow auto every 30 seconds
